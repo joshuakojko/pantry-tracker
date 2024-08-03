@@ -88,21 +88,6 @@ Deployed at [pantry-tracker-joshuakojko.vercel.app](https://pantry-tracker-joshu
 ### Sequence Diagram
 ![Sequence Diagram](sequenceDiagram.png)
 
-### Architecture Diagram
-```mermaid
-graph TD
-A[Client] -->|Next.js| B[Server]
-B -->|Firebase Auth| C[Authentication]
-B -->|Firestore| D[Database]
-B -->|Firebase Storage| E[File Storage]
-B -->|OpenRouter AI API| F[Recipe Generation]
-C --> G[User Management]
-D --> H[Inventory Management]
-E --> I[Image Storage]
-F --> J[AI-powered Recipes]
-B -->|Deployment| K[Vercel]
-```
-
 ## OpenRouter AI Integration
 
 This project uses [OpenRouter's Meta: LLaMa 3.1 8B Instruct (free) model](https://openrouter.ai/models/meta-llama/llama-3.1-8b-instruct%3Afree/api) for generating recipe suggestions. The API call is made to `https://openrouter.ai/api/v1/chat/completions` with the model specified as `meta-llama/llama-3.1-8b-instruct:free`.

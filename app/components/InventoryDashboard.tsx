@@ -60,7 +60,7 @@ import { CSVLink } from "react-csv";
 
 // PDF export imports
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 
 // Firebase imports
 import { auth, firestore, storage } from "@/app/firebase";
@@ -112,7 +112,7 @@ function InventoryDashboard() {
     const [items, setItems] = useState<Item[]>([]);
     const [filteredItems, setFilteredItems] = useState<Item[]>([]);
     const [editingItem, setEditingItem] = useState<Item | null>(null);
-    const [selectedItemId, setSelectedItemId] = useState(null);
+    const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
     // Dialog control state
     const [openDialog, setOpenDialog] = useState(false);
@@ -128,7 +128,7 @@ function InventoryDashboard() {
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
-    const [anchorEl, setAnchorEl] = useState(null);
+    const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     const [selectedSection, setSelectedSection] = useState("Pantry");
     const [isLoading, setIsLoading] = useState(true);
 
@@ -142,7 +142,7 @@ function InventoryDashboard() {
 
     // Router and authentication
     const router = useRouter();
-    const [groupId, setGroupId] = useState(null);
+    const [groupId, setGroupId] = useState<string | null>(null);
 
     // Responsive design
     const theme = useTheme();
@@ -173,10 +173,17 @@ function InventoryDashboard() {
         orderBy("createdAt", "desc")
       ),
       (snapshot) => {
-        const newItems = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        const newItems = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            name: data.name || '',
+            quantity: data.quantity || 0,
+            description: data.description || '',
+            image: data.image,
+            createdAt: data.createdAt,
+          } as Item;
+        });
         setItems(newItems);
         setFilteredItems(newItems);
         setIsLoading(false);
@@ -204,13 +211,9 @@ function InventoryDashboard() {
   }, [selectedSection]);
 
   // Logout user and redirect to login
-  const handleLogout = useCallback(async () => {
-    try {
-      await signOutUser();
-      setGroupId(null);
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
+  const handleLogout = useCallback(async (event: React.MouseEvent<HTMLElement>) => {
+    await signOutUser();
+    setGroupId(null);
   }, []);
 
   // Handle open dialog for editing or adding an item
@@ -219,7 +222,7 @@ function InventoryDashboard() {
       setEditingItem(item);
       setItemName(item.name);
       setItemDescription(item.description);
-      setItemImage(item.imageUrl ? { url: item.imageUrl } : null);
+      setItemImage(item.image ? { url: item.image } : null);
       setItemQuantity(item.quantity.toString());
     } else {
       setEditingItem(null);
@@ -243,6 +246,11 @@ function InventoryDashboard() {
 
   // Handle saving or updating an item in the inventory
   const handleSaveItem = async () => {
+    if (!auth.currentUser) {
+      console.error("User is not authenticated");
+      return;
+    }
+
     if (itemName && itemQuantity && itemDescription) {
       // Prepare item data
       const itemData: {
@@ -273,7 +281,7 @@ function InventoryDashboard() {
       }
 
       // Handle image upload if a new image is provided
-      if (itemImage && (itemImage instanceof File || !itemImage.url)) {
+      if (itemImage && (itemImage instanceof File)) {
         const imageRef = ref(
           storage,
           `inventory-images/${Date.now()}_${itemImage.name}`
@@ -346,6 +354,11 @@ function InventoryDashboard() {
 
   // Handle deleting an item from the inventory
   const handleDeleteItem = useCallback(async (id: string) => {
+    if (!auth.currentUser) {
+      console.error("User is not authenticated");
+      return;
+    }
+
     const itemRef = doc(
       firestore,
       `users/${auth.currentUser.displayName}/inventory`,
@@ -375,7 +388,7 @@ function InventoryDashboard() {
     setSnackbarOpen(false);
   }, []);
 
-  const handleExportClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleExportClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   }, []);
 
@@ -386,7 +399,7 @@ function InventoryDashboard() {
   // Handle export to PDF
   const exportToPDF = useCallback((dataToExport: Item[]) => {
     const doc = new jsPDF();
-    doc.autoTable({
+    autoTable(doc, {
       head: [["Name", "Quantity", "Description"]],
       body: dataToExport.map((item) => [
         item.name,
@@ -498,7 +511,7 @@ function InventoryDashboard() {
     }
   }, [selectedIngredients]);
 
-  const selectedItem = items.find((item) => item.id === selectedItemId);
+  const selectedItem = selectedItemId ? items.find(item => item.id === selectedItemId) : null;
 
   // Conditionally renders the content based on the selected section (Pantry, Recipes, or Download button)
   const renderContent = () => {

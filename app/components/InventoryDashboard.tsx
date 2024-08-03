@@ -39,8 +39,6 @@ import {
   ThemeProvider,
 } from "@mui/material";
 
-import themeConfig from '@/theme.json';
-
 // Material-UI Icons imports
 import {
   Add as AddIcon,

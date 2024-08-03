@@ -153,6 +153,7 @@ function InventoryDashboard() {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user && user.displayName) {
+        // Create the group
         setGroupId(user.displayName);
         setIsLoading(false);
       } else {
@@ -247,7 +248,6 @@ function InventoryDashboard() {
   // Handle saving or updating an item in the inventory
   const handleSaveItem = async () => {
     if (!auth.currentUser) {
-      console.error("User is not authenticated");
       return;
     }
 
@@ -355,7 +355,6 @@ function InventoryDashboard() {
   // Handle deleting an item from the inventory
   const handleDeleteItem = useCallback(async (id: string) => {
     if (!auth.currentUser) {
-      console.error("User is not authenticated");
       return;
     }
 

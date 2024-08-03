@@ -89,9 +89,6 @@ function LandingPage() {
       }
     }
 
-    // Create the group
-    await setDoc(groupRef, { createdAt: serverTimestamp() });
-
     // Attempt to sign in
     const user = await signInAnonymouslyWithGroupId(groupId);
     if (user && user.displayName) {

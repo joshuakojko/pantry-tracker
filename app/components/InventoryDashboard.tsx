@@ -90,6 +90,8 @@ import {
 import withAuth from "@/app/components/withAuth";
 import { signOutUser } from "@/app/firebase";
 
+import Markdown from "react-markdown";
+
 interface Item {
   id: string;
   name: string;
@@ -108,48 +110,48 @@ interface Item {
  */
 
 function InventoryDashboard() {
-    // Item management state
-    const [items, setItems] = useState<Item[]>([]);
-    const [filteredItems, setFilteredItems] = useState<Item[]>([]);
-    const [editingItem, setEditingItem] = useState<Item | null>(null);
-    const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  // Item management state
+  const [items, setItems] = useState<Item[]>([]);
+  const [filteredItems, setFilteredItems] = useState<Item[]>([]);
+  const [editingItem, setEditingItem] = useState<Item | null>(null);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
-    // Dialog control state
-    const [openDialog, setOpenDialog] = useState(false);
-    const [openDetailDialog, setOpenDetailDialog] = useState(false);
+  // Dialog control state
+  const [openDialog, setOpenDialog] = useState(false);
+  const [openDetailDialog, setOpenDetailDialog] = useState(false);
 
-    // Form input state
-    const [itemName, setItemName] = useState("");
-    const [itemDescription, setItemDescription] = useState("");
-    const [itemQuantity, setItemQuantity] = useState("");
-    const [itemImage, setItemImage] = useState<File | { url: string } | null>(null);
+  // Form input state
+  const [itemName, setItemName] = useState("");
+  const [itemDescription, setItemDescription] = useState("");
+  const [itemQuantity, setItemQuantity] = useState("");
+  const [itemImage, setItemImage] = useState<File | { url: string } | null>(null);
 
-    // UI state
-    const [snackbarOpen, setSnackbarOpen] = useState(false);
-    const [snackbarMessage, setSnackbarMessage] = useState("");
-    const [searchQuery, setSearchQuery] = useState("");
-    const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-    const [selectedSection, setSelectedSection] = useState("Pantry");
-    const [isLoading, setIsLoading] = useState(true);
+  // UI state
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [selectedSection, setSelectedSection] = useState("Pantry");
+  const [isLoading, setIsLoading] = useState(true);
 
-    // Recipe generation state
-    const [selectedIngredients, setSelectedIngredients] = useState<Item[]>([]);
-    const [recipeText, setRecipeText] = useState("");
-    const [isLoadingRecipe, setIsLoadingRecipe] = useState(false);
+  // Recipe generation state
+  const [selectedIngredients, setSelectedIngredients] = useState<Item[]>([]);
+  const [recipeText, setRecipeText] = useState("");
+  const [isLoadingRecipe, setIsLoadingRecipe] = useState(false);
 
-    // Refs
-    const fileInputRef = useRef(null);
+  // Refs
+  const fileInputRef = useRef(null);
 
-    // Router and authentication
-    const router = useRouter();
-    const [groupId, setGroupId] = useState<string | null>(null);
+  // Router and authentication
+  const router = useRouter();
+  const [groupId, setGroupId] = useState<string | null>(null);
 
-    // Responsive design
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-    const drawerWidth = isMobile ? 180 : 240;
+  // Responsive design
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const drawerWidth = isMobile ? 180 : 240;
 
-    // Load user data (assign groupId shared session key) and redirect if not authenticated
+  // Load user data (assign groupId shared session key) and redirect if not authenticated
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user && user.displayName) {
@@ -371,8 +373,8 @@ function InventoryDashboard() {
       } else {
         // Delete item if quantity is less than 1
         if (item.image) {
-            // Delete image from storage if present
-            await deleteObject(ref(storage, item.image));
+          // Delete image from storage if present
+          await deleteObject(ref(storage, item.image));
         }
         await deleteDoc(itemRef);
       }
@@ -453,7 +455,7 @@ function InventoryDashboard() {
     setIsLoadingRecipe(true);
 
     const ingredientsList = selectedIngredients.map(
-        (item) => `${item.name} (${item.quantity}x)`
+      (item) => `${item.name} (${item.quantity}x)`
     ).join(", ");
 
     const promptTemplate = `
@@ -649,8 +651,8 @@ function InventoryDashboard() {
                 <Grid item xs={12} sm={6} md={4} lg={3} key={item.id}>
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <Checkbox
-                        checked={selectedIngredients.some(selectedItem => selectedItem.id === item.id)}
-                        onChange={() => handleIngredientToggle(item)}
+                      checked={selectedIngredients.some(selectedItem => selectedItem.id === item.id)}
+                      onChange={() => handleIngredientToggle(item)}
                     />
                     <Typography>{item.name}</Typography>
                   </Box>
@@ -671,18 +673,7 @@ function InventoryDashboard() {
               <CircularProgress />
             ) : (
               <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
-                <TextareaAutosize
-                  value={recipeText}
-                  readOnly
-                  style={{
-                    width: '100%',
-                    minHeight: '200px',
-                    padding: '10px',
-                    fontFamily: 'monospace',
-                    whiteSpace: 'pre-wrap',
-                    overflowWrap: 'break-word',
-                  }}
-                />
+                <Markdown>{recipeText}</Markdown>
               </Box>
             )}
           </Box>
